@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VisitManagement.Api/VisitManagement.Api.csproj" />
+    <Project Path="src/VisitManagement.Application/VisitManagement.Application.csproj" />
+    <Project Path="src/VisitManagement.Domain/VisitManagement.Domain.csproj" />
+    <Project Path="src/VisitManagement.Infrastructure/VisitManagement.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VisitManagement.Api.Tests/VisitManagement.Api.Tests.csproj" />
+    <Project Path="tests/VisitManagement.Application.Tests/VisitManagement.Application.Tests.csproj" />
+    <Project Path="tests/VisitManagement.Domain.Tests/VisitManagement.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
