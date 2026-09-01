@@ -15,4 +15,7 @@
     <ProjectReference Include="..\VisitManagement.Infrastructure\VisitManagement.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="VisitManagement.Api.Tests" />
+  </ItemGroup>
 </Project>
