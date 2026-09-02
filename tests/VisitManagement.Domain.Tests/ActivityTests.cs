@@ -70,4 +70,26 @@ public class ActivityTests
         Assert.Throws<ArgumentException>(() =>
             Activity.Create(ActivityType.Business, "TN-001", start, end));
     }
+
+    [Fact]
+    public void Reconstitute_preserves_id()
+    {
+        var id = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+        var start = DateTimeOffset.Parse("2026-09-10T00:00:00Z");
+        var end = DateTimeOffset.Parse("2026-09-20T00:00:00Z");
+
+        var activity = Activity.Reconstitute(id, ActivityType.Business, " tn-001 ", start, end);
+
+        Assert.Equal(id, activity.Id);
+        Assert.Equal("TN-001", activity.TravellerNumber);
+    }
+
+    [Fact]
+    public void Reconstitute_rejects_empty_id()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            Activity.Reconstitute(Guid.Empty, ActivityType.Business, "TN-001",
+                DateTimeOffset.Parse("2026-09-10T00:00:00Z"),
+                DateTimeOffset.Parse("2026-09-20T00:00:00Z")));
+    }
 }

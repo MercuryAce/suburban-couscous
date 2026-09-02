@@ -12,20 +12,35 @@ public sealed class Visit
     public DateTimeOffset UpdatedAt { get; private set; }
     public string UpdatedBy { get; private set; }
 
-    private Visit(VisitStatus status, LicenceNumber licence, Visitor visitor, IReadOnlyList<Activity> activities, string createdBy, DateTimeOffset utcNow)
+    private Visit(
+        Guid id, 
+        VisitStatus status, 
+        LicenceNumber licence, 
+        Visitor visitor, 
+        IReadOnlyList<Activity> activities, 
+        string createdBy, 
+        DateTimeOffset createdAt, 
+        DateTimeOffset updatedAt, 
+        string updatedBy)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Status = status;
         Licence = licence;
         Visitor = visitor;
         Activities = activities;
-        CreatedAt = utcNow;
+        CreatedAt = createdAt;
         CreatedBy = createdBy;
-        UpdatedAt = utcNow;
-        UpdatedBy = createdBy;
+        UpdatedAt = updatedAt;
+        UpdatedBy = updatedBy;
     }
 
-    public static Visit Create(VisitStatus status, string vehicleLicenceNumber, Visitor? visitor, IReadOnlyList<Activity> activities, string createdBy, DateTimeOffset utcNow)
+    public static Visit Create(
+        VisitStatus status, 
+        string vehicleLicenceNumber, 
+        Visitor? visitor, 
+        IReadOnlyList<Activity> activities, 
+        string createdBy, 
+        DateTimeOffset utcNow)
     {
         if (visitor is null)
             throw new ArgumentException("Visitor is required.", nameof(visitor));
@@ -35,7 +50,40 @@ public sealed class Visit
             throw new ArgumentException("Created by cannot be empty.", nameof(createdBy));
 
         var licence = LicenceNumber.Parse(vehicleLicenceNumber);
-        return new Visit(status, licence, visitor, activities.ToList(), createdBy.Trim(), utcNow);
+        return new Visit(
+            Guid.NewGuid(),
+            status,
+            licence,
+            visitor,
+            activities.ToList(),
+            createdBy.Trim(),
+            utcNow,
+            utcNow,
+            createdBy.Trim());
+    }
+
+    public static Visit Reconstitute(
+        Guid id, 
+        VisitStatus status, 
+        string vehicleLicenceNumber, 
+        Visitor? visitor, 
+        IReadOnlyList<Activity> activities, 
+        string createdBy, 
+        DateTimeOffset createdAt, 
+        DateTimeOffset updatedAt, 
+        string updatedBy)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentException("Id cannot be empty");
+        if (visitor is null)
+            throw new ArgumentException("Visitor is required.", nameof(visitor));
+        if (activities is null || activities.Count == 0)
+            throw new ArgumentException("At least one activity is required.", nameof(activities));
+        if (string.IsNullOrWhiteSpace(createdBy))
+            throw new ArgumentException("Created by cannot be empty.", nameof(createdBy));
+        
+        var licence = LicenceNumber.Parse(vehicleLicenceNumber);
+        return new Visit(id, status, licence, visitor, activities, createdBy.Trim(), createdAt, updatedAt.ToUniversalTime(), updatedBy.Trim());
     }
 
     public void Update(VisitStatus status, string vehicleLicenceNumber, Visitor? visitor, IReadOnlyList<Activity> activities, string updatedBy, DateTimeOffset utcNow)

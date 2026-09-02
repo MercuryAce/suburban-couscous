@@ -11,4 +11,5 @@ public interface IVisitRepository
         int pageSize,
         CancellationToken cancellationToken = default
     );
+    Task<Visit?> UpdateAsync(Visit visit, CancellationToken cancellationToken = default);
 }
