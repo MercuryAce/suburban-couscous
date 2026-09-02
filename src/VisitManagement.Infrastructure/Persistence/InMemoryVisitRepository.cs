@@ -29,4 +29,10 @@ public sealed class InMemoryVisitRepository : IVisitRepository
         var items = ordered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return Task.FromResult(((IReadOnlyList<Visit>)items, ordered.Count));
     }
+
+    public Task<Visit?> UpdateAsync(Visit visit, CancellationToken cancellationToken = default)
+    {
+        _visits[visit.Id] = visit;
+        return Task.FromResult<Visit?>(visit);
+    }
 }

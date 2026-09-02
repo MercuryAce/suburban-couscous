@@ -15,21 +15,22 @@ public sealed class DomainExceptionHandler : IExceptionHandler
         {
             ValidationException => StatusCodes.Status400BadRequest,
             ArgumentException => StatusCodes.Status400BadRequest,
+            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             _ => 0
         };
 
         if (status == 0)
             return false;
 
-        context.Response.StatusCode = status;
-        await context.Response.WriteAsJsonAsync(new ProblemDetails
+        var problem = new ProblemDetails
         {
             Status = status,
-            Title = "Bad Request",
-            Detail = exception.Message,
-            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
-        }, cancellationToken);
+            Title = status == StatusCodes.Status401Unauthorized ? "Unauthorized" : "Bad Request",
+            Detail = exception.Message
+        };
 
+        context.Response.StatusCode = status;
+        await context.Response.WriteAsJsonAsync(problem, cancellationToken);
         return true;
     }
 }

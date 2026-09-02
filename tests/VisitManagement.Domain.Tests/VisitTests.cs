@@ -159,4 +159,43 @@ public class VisitTests
 
         Assert.Throws<ArgumentException>(action);
     }
+
+    [Fact]
+    public void Reconstitute_preserves_id_and_audit()
+    {
+        var visitId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+        var activityId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+        var createdAt = DateTimeOffset.Parse("2026-09-01T12:00:00Z");
+        var updatedAt = DateTimeOffset.Parse("2026-09-02T12:00:00Z");
+
+        var activity = Activity.Reconstitute(activityId, ActivityType.Business, "TN-001", Start, End);
+        var visit = Visit.Reconstitute(
+            visitId,
+            VisitStatus.Active,
+            " ab12 dtf ",
+            Visitor.Create("P123456", "Jane", "Doe"),
+            [activity],
+            "John Doe",
+            createdAt,
+            updatedAt,
+            "Jane Doe");
+
+        Assert.Equal(visitId, visit.Id);
+        Assert.Equal(activityId, visit.Activities[0].Id);
+        Assert.Equal("AB12 DTF", visit.Licence.Value);
+        Assert.Equal(createdAt, visit.CreatedAt);
+        Assert.Equal("John Doe", visit.CreatedBy);
+        Assert.Equal(updatedAt, visit.UpdatedAt);
+        Assert.Equal("Jane Doe", visit.UpdatedBy);
+    }
+
+    [Fact]
+    public void Reconstitute_rejects_empty_id()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            Visit.Reconstitute(Guid.Empty, VisitStatus.Active, "AB12 DTF",
+                Visitor.Create("P123456", "Jane", "Doe"), OneActivity(),
+                "John Doe", DateTimeOffset.Parse("2026-09-01T12:00:00Z"),
+                DateTimeOffset.Parse("2026-09-01T12:00:00Z"), "John Doe"));
+    }
 }
