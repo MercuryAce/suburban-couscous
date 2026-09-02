@@ -7,6 +7,9 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Authorization;
+using VisitManagement.Api.OpenApi;
 using VisitManagement.Api.Auth;
 using VisitManagement.Api.Middleware;
 using VisitManagement.Application.Abstractions;
@@ -29,7 +32,26 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
-builder.Services.AddOpenApi();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    options.AddOperationTransformer((operation, context, cancellationToken) =>
+    {
+        var metadata = context.Description.ActionDescriptor.EndpointMetadata;
+        if (metadata.OfType<IAllowAnonymous>().Any())
+            return Task.CompletedTask;
+        if (!metadata.OfType<IAuthorizeData>().Any())
+            return Task.CompletedTask;
+
+        operation.Security ??= [];
+        operation.Security.Add(new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+        });
+        return Task.CompletedTask;
+    });
+});
 
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 if (string.IsNullOrWhiteSpace(jwt.SigningKey) || jwt.SigningKey.Length < 32)

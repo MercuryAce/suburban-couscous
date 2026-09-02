@@ -55,4 +55,15 @@ public class CreateVisitTests
 
         await _repo.DidNotReceive().AddAsync(Arg.Any<Visit>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Execute_does_not_call_repository_when_licence_too_long()
+    {
+        var request = VisitTestFactory.ValidRequest() with { VehicleLicenceNumber = new string('C', 33) };
+
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.ExecuteAsync(request, "client-port-ops"));
+
+        await _repo.DidNotReceive().AddAsync(Arg.Any<Visit>(), Arg.Any<CancellationToken>());
+    }
 }

@@ -21,7 +21,7 @@ public sealed class AuthController(
             string.Equals(c.ClientId, request.ClientId, StringComparison.Ordinal)
             && !string.IsNullOrWhiteSpace(c.SecretHash)
             && SecretHasher.Matches(request.ClientSecret, c.SecretHash));
-
+        
         if (client is null)
         {
             return Unauthorized(new ProblemDetails

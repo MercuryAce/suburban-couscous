@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace VisitManagement.Api.Middleware;
 
-public sealed class DomainExceptionHandler : IExceptionHandler
+public sealed class DomainExceptionHandler(IProblemDetailsService problemDetails) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext context,
@@ -22,15 +22,18 @@ public sealed class DomainExceptionHandler : IExceptionHandler
         if (status == 0)
             return false;
 
-        var problem = new ProblemDetails
-        {
-            Status = status,
-            Title = status == StatusCodes.Status401Unauthorized ? "Unauthorized" : "Bad Request",
-            Detail = exception.Message
-        };
-
         context.Response.StatusCode = status;
-        await context.Response.WriteAsJsonAsync(problem, cancellationToken);
-        return true;
+
+        return await problemDetails.TryWriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = context,
+            Exception = exception,
+            ProblemDetails = new ProblemDetails
+            {
+                Status = status,
+                Title = status == StatusCodes.Status401Unauthorized ? "Unauthorized" : "Bad Request",
+                Detail = exception.Message
+            }
+        });
     }
 }

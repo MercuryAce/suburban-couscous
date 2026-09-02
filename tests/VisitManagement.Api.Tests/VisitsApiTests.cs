@@ -158,6 +158,10 @@ public class VisitsApiTests : IClassFixture<VisitManagementWebApplicationFactory
         var response = await _client.GetAsync($"/api/v1/visits/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions);
+        Assert.Equal(404, problem?.Status);
+        Assert.Equal("Not Found", problem?.Title);
+        Assert.Equal("Visit not found.", problem?.Detail);
     }
 
     [Fact]
@@ -219,6 +223,10 @@ public class VisitsApiTests : IClassFixture<VisitManagementWebApplicationFactory
             JsonOptions);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions);
+        Assert.Equal(404, problem?.Status);
+        Assert.Equal("Not Found", problem?.Title);
+        Assert.Equal("Visit not found.", problem?.Detail);
     }
 
     [Fact]
